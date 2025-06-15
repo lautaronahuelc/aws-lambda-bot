@@ -21,6 +21,27 @@ async function deleteCommandInserted(userId) {
   }
 }
 
+async function deleteLastMessageId(userId) {
+  try {
+    const data = await User.findOneAndUpdate(
+      { userId },
+      { lastMessageId: '' },
+      { new: true }
+    );
+
+    return {
+      data,
+      error: false,
+    };
+  } catch (err) {
+    console.error('❌ Error deleting lastMessageId:', err);
+    return {
+      data: null,
+      error: true,
+    };
+  }
+}
+
 async function editCommandInserted(userId, commandInserted) {
   try {
     const data = await User.findOneAndUpdate({ userId }, { commandInserted }, { new: true });
@@ -60,10 +81,9 @@ async function editLastMessageId(userId, lastMessageId) {
 
 async function getCommandInserted(userId) {
   try {
-    const data = await User.findOne({ userId }, 'commandInserted');
-
+    const { commandInserted } = await User.findOne({ userId }, 'commandInserted');
     return {
-      data,
+      data: commandInserted,
       error: false,
     };
   } catch (err) {
@@ -77,10 +97,10 @@ async function getCommandInserted(userId) {
 
 async function getLastMessageId(userId) {
   try {
-    const data = await User.findOne({ userId }, 'lastMessageId');
+    const { lastMessageId } = await User.findOne({ userId }, 'lastMessageId');
 
     return {
-      data,
+      data: lastMessageId,
       error: false,
     };
   } catch (err) {
@@ -111,6 +131,7 @@ async function incrementTotalExpenses(userId, amount) {
 
 const UserCollection = {
   deleteCommandInserted,
+  deleteLastMessageId,
   editCommandInserted,
   editLastMessageId,
   getCommandInserted,

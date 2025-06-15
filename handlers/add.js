@@ -1,5 +1,6 @@
 import ExpenseCollection from '../queries/expenses.js';
 import UserCollection from '../queries/users.js';
+import { setMessageReaction } from '../utils/telegramApi.js';
 
 export async function add(ctx) {
   const chatId = ctx.chat.id;
@@ -15,9 +16,9 @@ export async function add(ctx) {
     await setMessageReaction(ctx, '🤬');
     
     setTimeout(() => {
-      ctx.deleteMessage();
+      ctx.telegram.deleteMessage(chatId, messageId);
       ctx.telegram.deleteMessage(chatId, lastMessageId);
-    }, 2000);
+    }, 1500);
     
     return;
   }
@@ -44,9 +45,9 @@ export async function add(ctx) {
   await setMessageReaction(ctx, '👍');
 
   setTimeout(() => {
-    ctx.deleteMessage();
+    ctx.telegram.deleteMessage(chatId, messageId);
     ctx.telegram.deleteMessage(chatId, lastMessageId);
-  }, 2000);
+  }, 1500);
 }
 
 function getAmountAndDesc(text) {
