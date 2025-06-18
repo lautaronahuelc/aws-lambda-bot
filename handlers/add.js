@@ -1,8 +1,19 @@
+import { COMMAND } from '../constants/commands.js';
 import ExpenseCollection from '../queries/expenses.js';
 import UserCollection from '../queries/users.js';
+import { sleep } from '../utils/sleep.js';
 import { setMessageReaction } from '../utils/telegramApi.js';
 
-export async function add(ctx) {
+export async function onAdd(ctx) {
+  const messageId = ctx.message.message_id;
+  const userId = ctx.from.id;
+
+  await setMessageReaction(ctx, '👍');
+  await UserCollection.editLastMessageId(userId, messageId);
+  await UserCollection.editCommandInserted(userId, COMMAND.ADD);
+}
+
+export async function addExpense(ctx) {
   const chatId = ctx.chat.id;
   const messageId = ctx.message.message_id;
   const userId = ctx.from.id;
@@ -15,10 +26,9 @@ export async function add(ctx) {
   if (!amount || !desc) {
     await setMessageReaction(ctx, '🤬');
     
-    setTimeout(() => {
-      ctx.telegram.deleteMessage(chatId, messageId);
-      ctx.telegram.deleteMessage(chatId, lastMessageId);
-    }, 1500);
+    await sleep(1500);
+    ctx.telegram.deleteMessage(chatId, lastMessageId);
+    ctx.telegram.deleteMessage(chatId, messageId);
     
     return;
   }
@@ -44,10 +54,9 @@ export async function add(ctx) {
 
   await setMessageReaction(ctx, '👍');
 
-  setTimeout(() => {
-    ctx.telegram.deleteMessage(chatId, messageId);
-    ctx.telegram.deleteMessage(chatId, lastMessageId);
-  }, 1500);
+  await sleep(1500);
+  ctx.telegram.deleteMessage(chatId, lastMessageId);
+  ctx.telegram.deleteMessage(chatId, messageId);
 }
 
 function getAmountAndDesc(text) {

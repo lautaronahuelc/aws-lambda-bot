@@ -20,8 +20,25 @@ async function create({
   }
 }
 
+async function getAll(userId) {
+  try {
+    const data = await Expense.find(userId ? { userId } : {}).sort({ date: -1 });
+    return {
+      data,
+      error: false,
+    };
+  } catch (err) {
+    console.error('❌ Error loading expenses:', err);
+    return {
+      data: null,
+      error: true,
+    };
+  }
+}
+
 const ExpenseCollection = {
   create,
+  getAll,
 };
 
 export default ExpenseCollection;
