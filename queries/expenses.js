@@ -36,9 +36,26 @@ async function getAll(userId) {
   }
 }
 
+async function remove(id) {
+  try {
+    const data = await Expense.findByIdAndDelete(id);
+    return {
+      data,
+      error: false,
+    };
+  } catch (err) {
+    console.error('❌ Error deleting selected expense:', err);
+    return {
+      data: null,
+      error: true,
+    };
+  }
+}
+
 const ExpenseCollection = {
   create,
   getAll,
+  remove,
 };
 
 export default ExpenseCollection;

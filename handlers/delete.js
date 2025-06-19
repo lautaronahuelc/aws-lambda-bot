@@ -49,24 +49,23 @@ function buildInlineKeyboard(data) {
   return expensesKeyboard;
 }
 
-export async function deleteExpense(callbackQuery) {
-  switch (callbackQuery.data) {
+export async function deleteExpense(ctx) {
+  switch (ctx.update.callback_query.data) {
     case 'delete_cancel':
-      await handleDeleteCancel(callbackQuery);
+      await handleDeleteCancel(ctx);
       break;
     default:
-      await handleDeleteConfirm(callbackQuery); 
+      await handleDeleteConfirm(ctx); 
   }
 }
 
-async function handleDeleteCancel(callbackQuery) {
+async function handleDeleteCancel(ctx) {
   return;
 }
 
-async function handleDeleteConfirm(callbackQuery) {
-  const chatId = callbackQuery.message.chat.id;
-  const userId = callbackQuery.from.id;
-  const id = callbackQuery.data.replace('delete_', '');
+async function handleDeleteConfirm(ctx) {
+  const chatId = ctx.update.callback_query.message.chat.id;
+  const id = ctx.update.callback_query.data.replace('delete_', '');
 
   const { data: rData, error: rError } = await ExpenseCollection.remove(id);
 
@@ -77,7 +76,7 @@ async function handleDeleteConfirm(callbackQuery) {
 
   const { amount, desc } = rData;
 
-  const { error: iteError } = await UserCollection.incrementTotalExpenses(userId, -amount);
+  const { error: iteError } = await UserCollection.incrementTotalExpenses(chatId, -amount);
 
   if (iteError) {
     await sendMessage(
