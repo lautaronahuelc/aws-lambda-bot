@@ -1,92 +1,86 @@
 import ExpenseCollection from '../queries/expenses.js';
 import UserCollection from '../queries/users.js';
 import { formatExpenseText } from '../helpers/expenses.js';
-import { setMessageReaction } from '../utils/telegramApi.js';
-import { COMMAND } from '../constants/commands.js';
+import { initialKeyboard } from '../constants/keyboards.js';
 
 export async function onDelete(ctx) {
-  const messageId = ctx.message.message_id;
-  const userId = ctx.from.id;
-
-  await setMessageReaction(ctx, '👍');
-  await UserCollection.editLastMessageId(userId, messageId);
-  await UserCollection.editCommandInserted(userId, COMMAND.DELETE);
+  const userId = ctx.update.callback_query.from.id;
 
   const { data, error } = await ExpenseCollection.getAll(userId);
 
   if (!data.length) {
-    await setMessageReaction(ctx, '🤔');
+    await ctx.editMessageText('Menu principal\n\nNo se encontraron gastos', initialKeyboard);
     return;
   }
 
   if (error) {
-    await ctx.reply('❌ Ocurrió un error al obtener los gastos.');
+    await ctx.editMessageText('Menu principal\n\nError al obtener los gastos', initialKeyboard);
     return;
   }
 
   const inlineKeyboard = buildInlineKeyboard(data);
-  await ctx.reply('Seleccione el gasto a eliminar.', {
-    reply_markup: { inline_keyboard: inlineKeyboard },
-  });
+  await ctx.editMessageText(
+    'Menu principal > delete\n\nSelecccione el gasto que desea eliminar',
+    { reply_markup: { inline_keyboard: inlineKeyboard } }
+  );
 }
 
 function buildInlineKeyboard(data) {
   const sortedExpenses = data.sort((a, b) => a.date - b.date);
-  const expensesKeyboard = sortedExpenses.map(({ amount, desc, id }) => {
-    return [
-      {
-        text: formatExpenseText(amount, desc).replaceAll('_', ''),
-        callback_data: `delete_${id}`,
-      },
-    ];
-  });
+  const expensesKeyboard = [];
+
+  for (let i = 0; i < sortedExpenses.length; i += 2) {
+    const row = [];
+
+    const exp1 = sortedExpenses[i];
+    row.push({
+      text: formatExpenseText(exp1.amount, exp1.desc).replaceAll('_', ''),
+      callback_data: `delete_by_id_${exp1.id}`,
+    });
+
+    const exp2 = sortedExpenses[i + 1];
+    if (exp2) {
+      row.push({
+        text: formatExpenseText(exp2.amount, exp2.desc).replaceAll('_', ''),
+        callback_data: `delete_by_id_${exp2.id}`,
+      });
+    }
+
+    expensesKeyboard.push(row);
+  }
+
   expensesKeyboard.push([
     {
-      text: 'Cancelar',
-      callback_data: 'delete_cancel',
+      text: '< Volver',
+      callback_data: 'delete_goback',
     },
   ]);
+
   return expensesKeyboard;
 }
 
 export async function deleteExpense(ctx) {
-  switch (ctx.update.callback_query.data) {
-    case 'delete_cancel':
-      await handleDeleteCancel(ctx);
-      break;
-    default:
-      await handleDeleteConfirm(ctx); 
-  }
-}
+  const userId = ctx.update.callback_query.from.id;
+  const id = ctx.update.callback_query.data.replace('delete_by_id_', '');
 
-async function handleDeleteCancel(ctx) {
-  return;
-}
-
-async function handleDeleteConfirm(ctx) {
-  const chatId = ctx.update.callback_query.message.chat.id;
-  const id = ctx.update.callback_query.data.replace('delete_', '');
 
   const { data: rData, error: rError } = await ExpenseCollection.remove(id);
 
   if (rError) {
-    await sendMessage(chatId, '❌ Ocurrió un error al eliminar el gasto.');
+    await ctx.editMessageText('Menu principal\n\nError al eliminar el gasto. Inténtelo nuevamente...', initialKeyboard);
     return;
   }
 
   const { amount, desc } = rData;
 
-  const { error: iteError } = await UserCollection.incrementTotalExpenses(chatId, -amount);
+  const { error: iteError } = await UserCollection.incrementTotalExpenses(userId, -amount);
 
   if (iteError) {
-    await sendMessage(
-      chatId,
-      `❌ Ocurrió un error al actualizar los gastos totales. Agregar el gasto eliminado para evitar errores de cálculo.\n\n*Gasto elminado*\n${formatExpenseText(amount, desc)}`,
-      { parse_mode: 'Markdown' }
-    );
+    const message = `Menu principal\n\nError al actualizar los gastos totales. Agregar el gasto eliminado para evitar errores de cálculo.\n\n*Gasto elminado*\n${formatExpenseText(amount, desc)}`
+    await ctx.editMessageText(message, { ...initialKeyboard, parse_mode: 'Markdown' });
     return;
   }
 
-  // await reactToMessage(chatId, messageId, '👍');
+  await ctx.editMessageText('Menu principal\n\n✅ Gasto eliminado con éxito', initialKeyboard);
 }
 

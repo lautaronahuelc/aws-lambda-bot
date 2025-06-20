@@ -1,14 +1,38 @@
 import UserCollection from '../queries/users.js';
-import { sleep } from '../utils/sleep.js';
+import { goBackToMainMenu } from '../utils/goBackToMainMenu.js';
 import { setMessageReaction } from '../utils/telegramApi.js';
-import { deleteExpense } from './delete.js';
+import { onAdd } from './add.js';
+import { deleteExpense, onDelete } from './delete.js';
+import { onList } from './list.js';
 
 export async function onCallbackQuery(ctx) {
   const chatId = ctx.update.callback_query.message.chat.id;
   const messageId = ctx.update.callback_query.message.message_id;
   const data = ctx.update.callback_query.data;
 
-  const { data: lastMessageId } = await UserCollection.getLastMessageId(chatId);
+  if (data.startsWith('delete_by_id_')) {
+    await deleteExpense(ctx);
+    return;
+  };
+  
+  switch(data) {
+    case 'add':
+      onAdd(ctx);
+      break;
+    case 'list':
+      onList(ctx);
+      break;
+    case 'delete':
+      onDelete(ctx);
+      break;
+    case 'add_goback':
+    case 'list_goback':
+    case 'delete_goback':
+    default:
+      goBackToMainMenu(ctx);
+  }
+
+/*   const { data: lastMessageId } = await UserCollection.getLastMessageId(chatId);
   
   if (data.startsWith('delete_')) await deleteExpense(ctx);
 
@@ -19,10 +43,10 @@ export async function onCallbackQuery(ctx) {
     chat: { id: chatId },
     message: { message_id: lastMessageId },
   }, '👍');
-  ctx.telegram.deleteMessage(chatId, lastMessageId);
+  ctx.telegram.deleteMessage(chatId, lastMessageId); */
 
   // Importante: responder al callback para evitar spinner infinito
-  switch (data) {
+/*   switch (data) {
     case 'delete_cancel':
       ctx.answerCbQuery('Operación cancelada ❌');
       break;
@@ -31,5 +55,5 @@ export async function onCallbackQuery(ctx) {
   }
 
   await UserCollection.deleteCommandInserted(chatId);
-  await UserCollection.deleteLastMessageId(chatId);
+  await UserCollection.deleteLastMessageId(chatId); */
 }

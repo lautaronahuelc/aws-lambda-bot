@@ -11,13 +11,13 @@ export async function onText(ctx) {
   if (commandInserted) {
     switch (commandInserted) {
       case COMMAND.ADD:
+      default:
         await addExpense(ctx);
         break;
-      default:
-      console.warn(`Unknown command: ${commandInserted}`);
     }
 
+    // Remove flag indicating that the bot is waiting for a response
     await UserCollection.deleteCommandInserted(userId);
-    await UserCollection.deleteLastMessageId(userId);
+    // await UserCollection.deleteLastMessageId(userId);
   }
 }
