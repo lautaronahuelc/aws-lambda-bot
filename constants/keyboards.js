@@ -2,16 +2,16 @@ export const initialKeyboard = {
   reply_markup: {
     inline_keyboard: [
       [
-        { text: 'add', callback_data: 'add' },
-        { text: 'list', callback_data: 'list' },
+        { text: 'Nuevo gasto', callback_data: 'add' },
+        { text: 'Ver gastos', callback_data: 'list' },
       ],
       [
-        { text: 'delete', callback_data: 'delete' },
-        { text: 'userdetails', callback_data: 'showuserdetails' },
+        { text: 'Eliminar uno', callback_data: 'delete' },
+        { text: 'Ver usuarios', callback_data: 'showuserdetails' },
       ],
       [
-        { text: 'editsalary', callback_data: 'editsalary' },
-        { text: 'calculate', callback_data: 'calculate' },
+        { text: 'Editar salario', callback_data: 'editsalary' },
+        { text: 'Cierre', callback_data: 'calculate' },
       ],
     ]
   }
