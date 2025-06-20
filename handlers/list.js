@@ -10,7 +10,7 @@ export async function onList(ctx) {
     await editMessageText({
       ctx,
       message: '👀 _No hay gastos registrados._\n\n*Menu principal*\n\nSeleccione una opción:',
-      config: { parse_mode: 'Markdown', ...initialKeyboard },
+      keyboard: initialKeyboard,
     });
     return;
   }
@@ -19,7 +19,7 @@ export async function onList(ctx) {
     await editMessageText({
       ctx,
       message: '❌ _Error al obtener los gastos._\n\n*Menu principal*\n\nSeleccione una opción:',
-      config: { parse_mode: 'Markdown', ...initialKeyboard },
+      keyboard: initialKeyboard,
     });
     return;
   }
@@ -28,7 +28,7 @@ export async function onList(ctx) {
   await editMessageText({
     ctx,
     message,
-    config: { parse_mode: 'Markdown', ...buildBackKeyboard('list')},
+    keyboard: buildBackKeyboard('list'),
   });
 }
 

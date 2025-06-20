@@ -1,4 +1,5 @@
 import { initialKeyboard } from '../constants/keyboards.js';
+import { editMessageText } from '../helpers/editMessageText.js';
 import UserCollection from '../queries/users.js';
 
 export async function goBackToMainMenu(ctx) {
@@ -6,8 +7,9 @@ export async function goBackToMainMenu(ctx) {
 
   // Reset user state
   await UserCollection.deleteCommandInserted(userId);
-  await ctx.editMessageText(
-    '*Menú principal*\n\nSeleccione una opción:',
-    { parse_mode: 'Markdown', ...initialKeyboard }
-  );
+  await editMessageText({
+    ctx,
+    message: '*Menú principal*\n\nSeleccione una opción:',
+    keyboard: initialKeyboard,
+  });
 }

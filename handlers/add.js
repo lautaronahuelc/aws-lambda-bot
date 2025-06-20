@@ -11,7 +11,7 @@ export async function onAdd(ctx) {
   await editMessageText({
     ctx,
     message: '*Nuevo gasto*\n\nIngrese el nuevo gasto.\nPor ejemplo: "7000 huevos"',
-    config: { parse_mode: 'Markdown', ...buildBackKeyboard('add') },
+    keyboard: buildBackKeyboard('add'),
   });
   await UserCollection.editCommandInserted(userId, COMMAND.ADD);
 }
@@ -33,7 +33,7 @@ export async function addExpense(ctx) {
       chatId,
       lastMessageId,
       message: '❌ _Error en formato. Inténtelo nuevamente..._\n\n*Menú principal*\n\nSeleccione una opción:',
-      config: { parse_mode: 'Markdown', ...initialKeyboard },
+      keyboard: initialKeyboard,
     });
     return;
   }
@@ -51,7 +51,7 @@ export async function addExpense(ctx) {
       chatId,
       lastMessageId,
       message: '❌ _Error al agregar el gasto. Inténtelo nuevamente..._\n\n*Menú principal*\n\nSeleccione una opción:',
-      config: { parse_mode: 'Markdown', ...initialKeyboard },
+      keyboard: initialKeyboard,
     });
     return;
   }
@@ -64,7 +64,7 @@ export async function addExpense(ctx) {
       chatId,
       lastMessageId,
       message: '⚠️ _Error al actualizar los gastos totales._\n\n*Menú principal*\n\nSeleccione una opción:',
-      config: { parse_mode: 'Markdown', ...initialKeyboard },
+      keyboard: initialKeyboard,
     });
     return;
   }
@@ -74,7 +74,7 @@ export async function addExpense(ctx) {
     chatId,
     lastMessageId,
     message: '✅ _Nuevo gasto registrado con éxito._\n\n*Menú principal*\n\nSeleccione una opción:',
-    config: { parse_mode: 'Markdown', ...initialKeyboard },
+    keyboard: initialKeyboard,
   });
 
   await ctx.telegram.deleteMessage(chatId, messageId);

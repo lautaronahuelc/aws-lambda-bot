@@ -4,7 +4,6 @@ import dbConnect from './config/db.js';
 let bot;
 
 export const handler = async (event) => {
-  console.log('🚀 event:', JSON.parse(event.body).message.text);
   try {
     await dbConnect();
   

@@ -13,7 +13,7 @@ export async function onDelete(ctx) {
     await editMessageText({
       ctx,
       message: '👀 _No hay gastos registrados._\n\n*Menu principal*\n\nSeleccione una opción:',
-      config: { parse_mode: 'Markdown', ...initialKeyboard },
+      keyboard: initialKeyboard,
     });
     return;
   }
@@ -22,7 +22,7 @@ export async function onDelete(ctx) {
     await editMessageText({
       ctx,
       message: '❌ _Error al obtener los gastos._\n\n*Menu principal*\n\nSeleccione una opción:',
-      config: { parse_mode: 'Markdown', ...initialKeyboard },
+      keyboard: initialKeyboard,
     });
     return;
   }
@@ -31,8 +31,7 @@ export async function onDelete(ctx) {
   await editMessageText({
     ctx,
     message: '*Eliminar gasto*\n\nSelecccione el gasto que desea eliminar:',
-    config: {
-      parse_mode: 'Markdown',
+    keyboard: {
       reply_markup: {
         inline_keyboard: inlineKeyboard,
       }
@@ -85,7 +84,7 @@ export async function deleteExpense(ctx) {
     await editMessageText({
       ctx,
       message: '❌ _Error al eliminar el gasto. Inténtelo nuevamente..._\n\n*Menu principal*\n\nSeleccione una opción:',
-      config: { parse_mode: 'Markdown', ...initialKeyboard },
+      keyboard: initialKeyboard,
     });
     return;
   }
@@ -99,7 +98,7 @@ export async function deleteExpense(ctx) {
     await editMessageText({
       ctx,
       message,
-      config: { parse_mode: 'Markdown', ...initialKeyboard },
+      keyboard: initialKeyboard,
     });
     return;
   }
@@ -107,7 +106,7 @@ export async function deleteExpense(ctx) {
   await editMessageText({
     ctx,
     message: '✅ _Gasto eliminado con éxito._\n\n*Menu principal*\n\nSeleccione una opción:',
-    config: { parse_mode: 'Markdown', ...initialKeyboard },
+    keyboard: initialKeyboard,
   });
 }
 
