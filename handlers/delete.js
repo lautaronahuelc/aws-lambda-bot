@@ -2,6 +2,7 @@ import ExpenseCollection from '../queries/expenses.js';
 import UserCollection from '../queries/users.js';
 import { formatExpenseText } from '../helpers/expenses.js';
 import { initialKeyboard } from '../constants/keyboards.js';
+import { editMessageText } from '../helpers/editMessageText.js';
 
 export async function onDelete(ctx) {
   const userId = ctx.update.callback_query.from.id;
@@ -9,20 +10,34 @@ export async function onDelete(ctx) {
   const { data, error } = await ExpenseCollection.getAll(userId);
 
   if (!data.length) {
-    await ctx.editMessageText('Menu principal\n\nNo se encontraron gastos', initialKeyboard);
+    await editMessageText({
+      ctx,
+      message: '👀 _No hay gastos registrados._\n\n*Menu principal*\n\nSeleccione una opción:',
+      config: { parse_mode: 'Markdown', ...initialKeyboard },
+    });
     return;
   }
 
   if (error) {
-    await ctx.editMessageText('Menu principal\n\nError al obtener los gastos', initialKeyboard);
+    await editMessageText({
+      ctx,
+      message: '❌ _Error al obtener los gastos._\n\n*Menu principal*\n\nSeleccione una opción:',
+      config: { parse_mode: 'Markdown', ...initialKeyboard },
+    });
     return;
   }
 
   const inlineKeyboard = buildInlineKeyboard(data);
-  await ctx.editMessageText(
-    'Menu principal > delete\n\nSelecccione el gasto que desea eliminar',
-    { reply_markup: { inline_keyboard: inlineKeyboard } }
-  );
+  await editMessageText({
+    ctx,
+    message: '*Eliminar gasto*\n\nSelecccione el gasto que desea eliminar:',
+    config: {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: inlineKeyboard,
+      }
+    },
+  });
 }
 
 function buildInlineKeyboard(data) {
@@ -67,7 +82,11 @@ export async function deleteExpense(ctx) {
   const { data: rData, error: rError } = await ExpenseCollection.remove(id);
 
   if (rError) {
-    await ctx.editMessageText('Menu principal\n\nError al eliminar el gasto. Inténtelo nuevamente...', initialKeyboard);
+    await editMessageText({
+      ctx,
+      message: '❌ _Error al eliminar el gasto. Inténtelo nuevamente..._\n\n*Menu principal*\n\nSeleccione una opción:',
+      config: { parse_mode: 'Markdown', ...initialKeyboard },
+    });
     return;
   }
 
@@ -76,11 +95,19 @@ export async function deleteExpense(ctx) {
   const { error: iteError } = await UserCollection.incrementTotalExpenses(userId, -amount);
 
   if (iteError) {
-    const message = `Menu principal\n\nError al actualizar los gastos totales. Agregar el gasto eliminado para evitar errores de cálculo.\n\n*Gasto elminado*\n${formatExpenseText(amount, desc)}`
-    await ctx.editMessageText(message, { ...initialKeyboard, parse_mode: 'Markdown' });
+    const message = `⚠️ _Error al actualizar los gastos totales. Gasto elminado: ${formatExpenseText(amount, desc)}_\n\n*Menu principal*\n\nSeleccione una opción:`;
+    await editMessageText({
+      ctx,
+      message,
+      config: { parse_mode: 'Markdown', ...initialKeyboard },
+    });
     return;
   }
 
-  await ctx.editMessageText('Menu principal\n\n✅ Gasto eliminado con éxito', initialKeyboard);
+  await editMessageText({
+    ctx,
+    message: '✅ _Gasto eliminado con éxito._\n\n*Menu principal*\n\nSeleccione una opción:',
+    config: { parse_mode: 'Markdown', ...initialKeyboard },
+  });
 }
 

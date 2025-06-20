@@ -1,3 +1,4 @@
+import { parse } from 'dotenv';
 import { COMMAND } from '../constants/commands.js';
 import { buildBackKeyboard, initialKeyboard } from '../constants/keyboards.js';
 import { editMessageText } from '../helpers/editMessageText.js';
@@ -9,8 +10,8 @@ export async function onAdd(ctx) {
   
   await editMessageText({
     ctx,
-    message: 'Menu principal > add\n\nIngresa el gasto con el formato <precio> <descripción>',
-    config: buildBackKeyboard('add'),
+    message: '*Nuevo gasto*\n\nIngrese el nuevo gasto.\nPor ejemplo: "7000 huevos"',
+    config: { parse_mode: 'Markdown', ...buildBackKeyboard('add') },
   });
   await UserCollection.editCommandInserted(userId, COMMAND.ADD);
 }
@@ -23,8 +24,6 @@ export async function addExpense(ctx) {
 
   const { data: lastMessageId } = await UserCollection.getLastMessageId(userId);
 
-  console.log(messageId, lastMessageId);
-
   const { amount , desc } = getAmountAndDesc(ctx.message.text); 
 
   if (!amount || !desc) {
@@ -33,8 +32,8 @@ export async function addExpense(ctx) {
       ctx,
       chatId,
       lastMessageId,
-      message: 'Error en formato. Inténtelo de nuevo...\n\nMenu pricipal',
-      config: initialKeyboard,
+      message: '❌ _Error en formato. Inténtelo nuevamente..._\n\n*Menú principal*\n\nSeleccione una opción:',
+      config: { parse_mode: 'Markdown', ...initialKeyboard },
     });
     return;
   }
@@ -51,8 +50,8 @@ export async function addExpense(ctx) {
       ctx,
       chatId,
       lastMessageId,
-      message: 'Menu principal\n\nError al agregar el gasto. Inténtelo de nuevo...',
-      config: initialKeyboard,
+      message: '❌ _Error al agregar el gasto. Inténtelo nuevamente..._\n\n*Menú principal*\n\nSeleccione una opción:',
+      config: { parse_mode: 'Markdown', ...initialKeyboard },
     });
     return;
   }
@@ -64,8 +63,8 @@ export async function addExpense(ctx) {
       ctx,
       chatId,
       lastMessageId,
-      message: 'Menu principal\n\nError al actualizar los gastos totales',
-      config: initialKeyboard,
+      message: '⚠️ _Error al actualizar los gastos totales._\n\n*Menú principal*\n\nSeleccione una opción:',
+      config: { parse_mode: 'Markdown', ...initialKeyboard },
     });
     return;
   }
@@ -74,8 +73,8 @@ export async function addExpense(ctx) {
     ctx,
     chatId,
     lastMessageId,
-    message: 'Menu principal\n\n✅ Nuevo gasto registrado con éxito',
-    config: initialKeyboard,
+    message: '✅ _Nuevo gasto registrado con éxito._\n\n*Menú principal*\n\nSeleccione una opción:',
+    config: { parse_mode: 'Markdown', ...initialKeyboard },
   });
 
   await ctx.telegram.deleteMessage(chatId, messageId);

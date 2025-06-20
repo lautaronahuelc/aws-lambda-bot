@@ -1,22 +1,35 @@
 import ExpenseCollection from '../queries/expenses.js';
 import { formatExpenseText } from '../helpers/expenses.js';
-import { buildBackKeyboard } from '../constants/keyboards.js';
+import { buildBackKeyboard, initialKeyboard } from '../constants/keyboards.js';
+import { editMessageText } from '../helpers/editMessageText.js';
 
 export async function onList(ctx) {
   const { data, error } = await ExpenseCollection.getAll();
 
   if (!data.length) {
-    await ctx.editMessageText('Menu principal\n\nNo se encontraron gastos', initialKeyboard);
+    await editMessageText({
+      ctx,
+      message: '👀 _No hay gastos registrados._\n\n*Menu principal*\n\nSeleccione una opción:',
+      config: { parse_mode: 'Markdown', ...initialKeyboard },
+    });
     return;
   }
 
   if (error) {
-    await ctx.editMessageText('Menu principal\n\nError al obtener los gastos', initialKeyboard);
+    await editMessageText({
+      ctx,
+      message: '❌ _Error al obtener los gastos._\n\n*Menu principal*\n\nSeleccione una opción:',
+      config: { parse_mode: 'Markdown', ...initialKeyboard },
+    });
     return;
   }
   
   const message = buildMessage(data);
-  await ctx.editMessageText(message, { parse_mode: 'Markdown', ...buildBackKeyboard('list')});
+  await editMessageText({
+    ctx,
+    message,
+    config: { parse_mode: 'Markdown', ...buildBackKeyboard('list')},
+  });
 }
 
 function buildMessage(data) {
@@ -28,10 +41,10 @@ function buildMessage(data) {
     return grouped;
   }, {});
 
-  let message = 'Menu principal > list\n\n';
+  let message = '*Gastos registrados\n\n*';
 
   for (const user in groupedExpenses) {
-    message += `*Gastos de ${user}*\n${groupedExpenses[user].join('\n')}\n\n`;
+    message += `*${user}*\n${groupedExpenses[user].join('\n')}\n\n`;
   }
 
   return message;

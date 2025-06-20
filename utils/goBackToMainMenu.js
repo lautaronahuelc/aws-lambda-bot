@@ -6,5 +6,8 @@ export async function goBackToMainMenu(ctx) {
 
   // Reset user state
   await UserCollection.deleteCommandInserted(userId);
-  await ctx.editMessageText('Menu principal', initialKeyboard);
+  await ctx.editMessageText(
+    '*Menú principal*\n\nSeleccione una opción:',
+    { parse_mode: 'Markdown', ...initialKeyboard }
+  );
 }
